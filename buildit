@@ -1,21 +1,147 @@
 #!/bin/sh
-make clean
-make distclean
-
-echo "Copiamos la configuracion default del sistema" 
-cp /boot/config-3.16.0-4-amd64 .config
-echo "ejecutamos el menuconfig"
-make menuconfig
-echo "ejecutamos localmodconfig"
-make localmodconfig
-echo "Ejecutamos make vmlinux"
-xterm -e "make vmlinux -j2"
-echo "ejecutamos modules"
-xterm -e "make modules -j2" 
-echo "ejecutamos modules_install" 
-xterm -e "make modules_install -j2"
-echo "ejecutamos make deb"
-xterm -e "make deb-pkg -j2"
-echo "ejecutamos grub-update"
-xterm -e "update-grub2"
-echo "Terminado."
+oldconfig(){
+	depmod -a	
+	make oldconfig
+	return 0
+}
+menuconfig(){
+	make menuconfig
+return 0
+}
+localmodconfig(){
+	make localmodconfig
+return 0
+}
+makeit(){
+	make -j4
+return 0
+}
+estadisticas(){
+	ccahe -s
+	return 0
+}
+vmlinux(){
+	make vmlinux -j4
+return 0
+}
+modulos(){
+	make modules -j4
+return0
+}
+modulos_install(){
+	make modules_install -j4
+return 0
+}
+install(){
+	make install -j4
+return 0
+}
+update_grub(){
+	update-grub
+return 0
+}
+completos (){
+	clean
+	#make clean
+	#make distclean
+#	xterm -e "watch 'ccache -s'" &
+#	ccache -z
+	estadisticas
+	echo "Copiamos la configuracion default del sistema" 
+#	cp /boot/config-4.2.3 .config
+#	depmod -a
+	oldconfig
+	echo "ejecutamos el menuconfig"
+#	xterm -e "make menuconfig"
+	menuconfig	
+	echo "ejecutamos localmodconfig"
+#	xterm -e "make localmodconfig"
+	localmodconfig
+	echo "Ejecutamos make vmlinux"
+	makeit	
+	vmlinux
+#	xterm -e "make vmlinux -j4"
+	modulos
+	echo "ejecutamos modules"
+#	xterm -e "make modules -j4" 
+	echo "ejecutamos modules_install" 
+	modulos_install
+#	xterm -e "make modules_install -j4"
+	echo "ejecutamos make deb"
+#	xterm -e "make install -j4"
+	install
+	echo "ejecutamos grub-update"
+	update_grub
+#	xterm -e "update-grub2"
+	echo "Terminado."
+	read OK
+	return 0
+}
+clean(){
+	rc=$(make clean)
+	rc2=$(make distclean)
+	ccache -z
+	echo "rc = $rc rc2 = $rc2"
+	
+return 0
+}
+debpkg(){
+	make deb-pkg -j4
+}
+dependencias(){
+	apt-fast build-dep linux-image-generic
+}
+Flags(){
+	procesadores=$(nproc)
+	procesadores_default=5
+	echo "el numero de procesadores es: $procesadores default: $procesadores_default con cuantos desea compilar?"
+read respuesta
+if [$respuesta == ""]
+then
+	echo "Cargando default"
+	respuesta=$procesadores_default
+else
+	echo "usando: $respuesta procesadores"
+	
+fi
+return $respuesta
+}
+#--------------------------------------------------------------------
+#clear
+while :
+do
+echo "---------------------------------------------------------------------------------------------------"
+echo "Por favor seleccione una opcion:"
+echo ""
+echo "0.- Clean"
+echo "1.- Estadisticas"
+echo "2.- Oldconfig"
+echo "3.- Menuconfig"
+echo "4.- Localmodconfig"
+echo "5.- Make Vmlinux"
+echo "6.- Make Modules"
+echo "7.- Make Vmlinux y Modules"
+echo "8.- Make Install"
+echo "9.- Update-grub"
+echo "10.- completos"
+echo "11.- Flags"
+echo "x.- Salir"
+read SEL
+case $SEL in
+        0) clean;;
+        1) estadisticas;;
+        2) oldconfig;;
+        3) menuconfig;;
+        4) localmodconfig;;
+        5) vmlinux;;
+        6) modules;;
+        7) modules_install;;
+        8) modules_modules_install;;
+        9) install;;
+        10) completos;;
+        11) A=$(Flags);echo "usando: $A ";exit;;
+        x) exit ;;
+esac
+clear
+done
+exit
