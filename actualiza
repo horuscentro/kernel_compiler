@@ -6,3 +6,4 @@ sudo add-apt-repository ppa:saiarcot895/myppa
 sudo apt-get update
 sudo apt-get -y install apt-fast
 sudo apt-fast update
+sudo apt-fast install build-essential git subversion dkms -y
