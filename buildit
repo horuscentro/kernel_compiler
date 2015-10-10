@@ -1,0 +1,21 @@
+#!/bin/sh
+make clean
+make distclean
+
+echo "Copiamos la configuracion default del sistema" 
+cp /boot/config-3.16.0-4-amd64 .config
+echo "ejecutamos el menuconfig"
+make menuconfig
+echo "ejecutamos localmodconfig"
+make localmodconfig
+echo "Ejecutamos make vmlinux"
+xterm -e "make vmlinux -j2"
+echo "ejecutamos modules"
+xterm -e "make modules -j2" 
+echo "ejecutamos modules_install" 
+xterm -e "make modules_install -j2"
+echo "ejecutamos make deb"
+xterm -e "make deb-pkg -j2"
+echo "ejecutamos grub-update"
+xterm -e "update-grub2"
+echo "Terminado."
